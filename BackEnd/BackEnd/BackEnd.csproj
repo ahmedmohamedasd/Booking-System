@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Migrations\20230403133310_BlockAreaTable.cs" />
+    <Compile Remove="Migrations\20230403133310_BlockAreaTable.Designer.cs" />
+    <Compile Remove="Migrations\20230403144353_AddGuest.cs" />
+    <Compile Remove="Migrations\20230403144353_AddGuest.Designer.cs" />
+    <Compile Remove="Migrations\20230403144452_AddGuestTable.cs" />
+    <Compile Remove="Migrations\20230403144452_AddGuestTable.Designer.cs" />
+    <Compile Remove="Migrations\20230403150415_AddguestActivitycolumn.cs" />
+    <Compile Remove="Migrations\20230403150415_AddguestActivitycolumn.Designer.cs" />
+    <Compile Remove="Migrations\20230403193018_addPriceToTicketAndActivity.cs" />
+    <Compile Remove="Migrations\20230403193018_addPriceToTicketAndActivity.Designer.cs" />
+    <Compile Remove="Migrations\20230403203050_UpdateTimeFormat.cs" />
+    <Compile Remove="Migrations\20230403203050_UpdateTimeFormat.Designer.cs" />
+    <Compile Remove="Migrations\20230530172849_DateOfBooking_GuestTicket.cs" />
+    <Compile Remove="Migrations\20230530172849_DateOfBooking_GuestTicket.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.32" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+
+</Project>
