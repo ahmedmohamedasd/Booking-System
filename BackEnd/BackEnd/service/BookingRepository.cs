@@ -144,8 +144,8 @@ namespace BackEnd.service
         {
             var ticketList = context.tickets.OrderBy(c=>c.Sorting).ToList();
             var depositWayList = context.DepositWays.ToList();
-            var whereYouFromList = context.WhereYouFroms.ToList();
-            var howYouKnowUsList = context.HowYouKnowUss.ToList();
+            var whereYouFromList = context.WhereYouFroms.Where(c => c.IsDeleted == false).OrderBy(c=>c.Sorting).ToList();
+            var howYouKnowUsList = context.HowYouKnowUss.Where(c => c.IsDeleted == false).OrderBy(c=>c.Sorting).ToList();
             var model = new TicketViewModel
             {
                 Tickets = ticketList,
@@ -155,7 +155,6 @@ namespace BackEnd.service
             };
             return model;
         }
-
         public IEnumerable<listGuestViewModel> GetListOfGuests(DateTime date)
         {
             List<listGuestViewModel> model = new List<listGuestViewModel>();
@@ -167,13 +166,43 @@ namespace BackEnd.service
                     listGuestViewModel ss = new listGuestViewModel();
                     if (guests[i].BookingTypeId == 1)
                     {
-                        var tickets = context.GuestTickets.AsNoTracking().Where(c => c.GuestId == guests[i].Id).ToList();
-                        ss.GuestTickets = tickets;
+                        List<GuestTicketViewModel> gtvm = new List<GuestTicketViewModel>();
+                        var tickets = context.GuestTickets.Include(c=>c.Ticket).AsNoTracking().Where(c => c.GuestId == guests[i].Id).ToList();
+                        for(int k = 0; k < tickets.Count; k++)
+                        {
+                            var tvm = new GuestTicketViewModel
+                            {
+                                TicketName = tickets[k].Ticket.TicketName,
+                                CountOfAdult = tickets[k].CountOfAdult,
+                                CountOfKids = tickets[k].CountOfKids,
+                                PriceForAdult = (decimal)tickets[k].PriceForAdult,
+                                PriceForKids = (decimal)tickets[k].PriceForKids,
+                                SubTotal = (decimal)((tickets[k].CountOfAdult * tickets[k].PriceForAdult) +
+                                (tickets[k].CountOfKids * tickets[k].PriceForKids))
+                            };
+                            gtvm.Add(tvm);
+
+                        }
+                        
+                        ss.GuestTickets = gtvm;
                     }
                     else
                     {
-                        var activities = context.GuestActivities.Where(c => c.GuestId == guests[i].Id).ToList();
-                        ss.GuestActivities = activities;
+                        var activities = context.GuestActivities.Include(c=>c.Activity).Where(c => c.GuestId == guests[i].Id).ToList();
+                        List<GuestActivityViewModel> gavm = new List<GuestActivityViewModel>();
+                        for(int k = 0; k < activities.Count; k++)
+                        {
+                            var vm = new GuestActivityViewModel
+                            {
+                                ActivityName = activities[k].Activity.ActivityName,
+                                Quantity = activities[k].Quantity,
+                                IsIncluded = activities[k].IsIncluded,
+                                Price = (decimal)activities[k].ActivityPrice
+                            };
+                            gavm.Add(vm);
+                        }
+                        
+                        ss.GuestActivities = gavm;
                     }
                     var areas = context.BookedGuestAreas.AsNoTracking().Where(c => c.GuestId == guests[i].Id && c.DateOfBooking.Date == guests[i].DateOfBooking.Date).ToList();
                     ss.GuestAreas = areas;
@@ -183,7 +212,6 @@ namespace BackEnd.service
             }
             return model;
         }
-
       
         public async Task<Guest> EditGuest(int guestId, DateTime date)
         {
@@ -204,14 +232,12 @@ namespace BackEnd.service
             var guestTickets = context.GuestTickets.Where(c => c.GuestId == guestId).ToList();
 
             var depositWayList = context.DepositWays.ToList();
-            var whereYouFromList = context.WhereYouFroms.ToList();
-            var howYouKnowUsList = context.HowYouKnowUss.ToList();
-
+            var whereYouFromList = context.WhereYouFroms.Where(c=>c.IsDeleted == false).OrderBy(c=>c.Sorting).ToList();
+            var howYouKnowUsList = context.HowYouKnowUss.Where(c => c.IsDeleted == false).OrderBy(c=>c.Sorting).ToList();
             if(ticketList.Count > 0  )
             {
                for(int i = 0; i < ticketList.Count; i++)
                 {
-              
                     var ss = new TicketModel
                     {
                         Id = ticketList[i].Id,
@@ -234,6 +260,8 @@ namespace BackEnd.service
                         ticketModels[i].QuantityForKids = guestTickets[index].CountOfKids;
                         ticketModels[i].SubTotalAdult = (decimal)(guestTickets[index].PriceForAdult * guestTickets[index].CountOfAdult);
                         ticketModels[i].SubTotalKids = (decimal)(guestTickets[index].PriceForKids * guestTickets[index].CountOfKids);
+                        ticketModels[i].PriceForAdult = (decimal)guestTickets[index].PriceForAdult;
+                        ticketModels[i].PriceForKids = (decimal)guestTickets[index].PriceForKids;
 
                     }
                 }
@@ -286,6 +314,52 @@ namespace BackEnd.service
             return model;
         }
 
-     
+        public listGuestViewModel GetGuestDetailsById(int id)
+        {
+            listGuestViewModel model = new listGuestViewModel();
+            var guest = context.Guests.FirstOrDefault(c => c.Id == id);
+            model.Guests = guest;
+            var bookedArea = context.BookedGuestAreas.Where(c => c.GuestId == id).ToList();
+            model.GuestAreas = bookedArea;
+            if(guest.BookingTypeId == 1)
+            {
+                var tickets = context.GuestTickets.Include(c=>c.Ticket).Where(c => c.GuestId == id).ToList();
+                List<GuestTicketViewModel> guestTickets = new List<GuestTicketViewModel>();
+                for(int i = 0; i < tickets.Count; i++)
+                {
+                    var tvm = new GuestTicketViewModel
+                    {
+                        TicketName = tickets[i].Ticket.TicketName,
+                        CountOfAdult = tickets[i].CountOfAdult,
+                        CountOfKids = tickets[i].CountOfKids,
+                        PriceForAdult = (decimal)tickets[i].PriceForAdult,
+                        PriceForKids = (decimal)tickets[i].PriceForKids,
+                        SubTotal = (decimal)((tickets[i].CountOfAdult * tickets[i].PriceForAdult) +
+                                 (tickets[i].CountOfKids * tickets[i].PriceForKids))
+                    };
+                    guestTickets.Add(tvm);
+                }
+                model.GuestTickets = guestTickets;
+            }
+            else
+            {
+                var activities = context.GuestActivities.Include(c => c.Activity).Where(c => c.GuestId == id).ToList();
+                List<GuestActivityViewModel> gavm = new List<GuestActivityViewModel>();
+                for (int k = 0; k < activities.Count; k++)
+                {
+                    var vm = new GuestActivityViewModel
+                    {
+                        ActivityName = activities[k].Activity.ActivityName,
+                        Quantity = activities[k].Quantity,
+                        IsIncluded = activities[k].IsIncluded,
+                        Price = (decimal)activities[k].ActivityPrice
+                    };
+                    gavm.Add(vm);
+                }
+
+                model.GuestActivities = gavm;
+            }
+            return model;
+        }
     }
 }

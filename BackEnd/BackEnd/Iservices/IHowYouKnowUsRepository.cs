@@ -14,5 +14,7 @@ namespace BackEnd.Iservices
         Task<HowYouKnowUs> DeleteWay(int id);
         Task<HowYouKnowUs> UndoDeleteWay(int id);
         List<HowYouKnowUs> GetListOfWays();
+        int GetSorting();
+        int GetIdByName(string name);
     }
 }

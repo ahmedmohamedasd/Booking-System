@@ -13,6 +13,7 @@ namespace BackEnd.Iservices
         IEnumerable<TicketStatistics> GetTicketStatistics(DateTime dateFrom, DateTime dateTo);
         IEnumerable<ActivityStatistics> GetActivityStatistics(DateTime dateFrom, DateTime dateTo);
         IEnumerable<GuestStatistics> GetGuestStatistics(DateTime dateFrom, DateTime dateTo);
+        IEnumerable<Statistics> GetGatheringStatistics(DateTime dateFrom, DateTime dateTo , int BookTypeId);
 
     }
 }

@@ -16,5 +16,6 @@ namespace BackEnd.Iservices
         Task<BookedGuestArea> DeleteGuestArea(int guestId , int areaId);
         Task<List<BookedGuestArea>> EditGuestArea(int guestId, List<BookedGuestArea> model);
         Task<List<BookedGuestArea>> DeleteGuestArea(List<BookedGuestArea> model);
+        Task<List<BookedGuestArea>> DeleteGuestArea(int guestId);
     }
 }

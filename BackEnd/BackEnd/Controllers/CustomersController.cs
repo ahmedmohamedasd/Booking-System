@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -12,9 +13,10 @@ namespace BackEnd.Controllers
     [ApiController]
     public class CustomersController : ControllerBase
     {
-        [HttpGet]
-        [Authorize(Roles = "operator")]
-       
+       [HttpGet]
+      // [Authorize(Policy ="Booking_Show")]
+       [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Booking_Show")]
+       // [Authorize(AuthenticationSchemes = "Bearer")]
         public IEnumerable<string> Get() => new string[] { "ahmed", "Esmail" };
     }
 }

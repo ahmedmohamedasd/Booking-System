@@ -59,8 +59,8 @@ namespace BackEnd.service
                 }
             }
             var depositWayList = _context.DepositWays.ToList();
-            var whereYouFromList = _context.WhereYouFroms.ToList();
-            var howYouKnowUsList = _context.HowYouKnowUss.ToList();
+            var whereYouFromList = _context.WhereYouFroms.OrderBy(c=>c.Sorting).ToList();
+            var howYouKnowUsList = _context.HowYouKnowUss.OrderBy(c=>c.Sorting).ToList();
             var model = new ActivityViewModel
             {
                 Activities = activityModels,
@@ -80,8 +80,8 @@ namespace BackEnd.service
         public EditActivityViewModel GetEditActivityViewModel(int guestId)
         {
             var guest = _context.Guests.Where(c => c.Id == guestId).ToList();
-            var whereYouFrom = _context.WhereYouFroms.ToList();
-            var HowYouKnowUs = _context.HowYouKnowUss.ToList();
+            var whereYouFrom = _context.WhereYouFroms.OrderBy(c=>c.Sorting).ToList();
+            var HowYouKnowUs = _context.HowYouKnowUss.OrderBy(c=>c.Sorting).ToList();
             var DepositWayes = _context.DepositWays.ToList();
             var GuestActivities = _context.GuestActivities.Where(c => c.GuestId == guestId).ToList();
             var activities = _context.Activitys.OrderBy(c=>c.Sorting).ToList();
@@ -108,6 +108,7 @@ namespace BackEnd.service
                     var index = GuestActivities.IndexOf(GuestActivities.Find(c => c.ActivityId == activityModels[i].Id));
                     if(index != -1)
                     {
+                        activityModels[i].ActivityPrice = (decimal)GuestActivities[index].ActivityPrice;
                         activityModels[i].IsIncluded = GuestActivities[index].IsIncluded;
                         activityModels[i].Quantity = GuestActivities[index].Quantity;
                         activityModels[i].SubTotal = GuestActivities[index].SubTotal;

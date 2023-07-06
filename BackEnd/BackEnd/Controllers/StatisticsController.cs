@@ -1,5 +1,6 @@
 ﻿using BackEnd.Iservices;
 using BackEnd.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace BackEnd.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class StatisticsController : ControllerBase
     {
         private readonly IStatisticsRepository _statisticsRepository;
@@ -66,6 +68,16 @@ namespace BackEnd.Controllers
             var model = _statisticsRepository.GetGuestStatistics(DateFrom, DateTo);
             return model;
         }
+        [HttpGet("GetGatheringStatistics/{dateOfFrom}/{dateOfTo}/{bookTypeId}")]
+        public IEnumerable<Statistics> GetGatheringStatistics(string dateOfFrom, string dateOfTo , int bookTypeId)
+        {
+            DateTime DateFrom = DateTime.ParseExact(dateOfFrom, "MM-dd-yyyy", null);
+            DateTime DateTo = DateTime.ParseExact(dateOfTo, "MM-dd-yyyy", null);
+
+            var model = _statisticsRepository.GetGatheringStatistics(DateFrom, DateTo , bookTypeId);
+            return model;
+        }
+
 
 
 

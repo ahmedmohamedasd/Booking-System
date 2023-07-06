@@ -79,5 +79,16 @@ namespace BackEnd.service
             }
             return way;
         }
+
+        public int GetSorting()
+        {
+            var sorting = _context.HowYouKnowUss.OrderByDescending(c => c.Sorting).FirstOrDefault().Sorting;
+            return sorting;
+        }
+        public int GetIdByName(string name)
+        {
+            var id = _context.HowYouKnowUss.FirstOrDefault(c => c.WayName.ToLower() == name.ToLower()).Id;
+            return id;
+        }
     }
 }

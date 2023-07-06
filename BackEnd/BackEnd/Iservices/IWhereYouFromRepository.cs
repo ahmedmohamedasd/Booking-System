@@ -14,5 +14,7 @@ namespace BackEnd.Iservices
         Task<WhereYouFrom> DeletePlace(int id);
         Task<WhereYouFrom> UndoDeletePlace(int id);
         List<WhereYouFrom> GetListOfPlaces();
+        int GetSorting();
+        int GetIdByName(string name);
     }
 }

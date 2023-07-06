@@ -21,7 +21,7 @@ namespace BackEnd.Iservices
         Task<List<BookedGuestArea>> AddBookedGuestArea(List<BookedGuestArea> model);
         IEnumerable<listGuestViewModel> GetListOfGuests(DateTime date);
         IEnumerable<AreaViewModel> GetSelectedBookedArea(EditSelectedAreaViewModel model);
-
+        listGuestViewModel GetGuestDetailsById(int id);
         Task<Guest> EditGuest(int guestId , DateTime date);
         Task<Guest> EditGuest(Guest model);
     }

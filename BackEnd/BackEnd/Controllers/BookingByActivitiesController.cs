@@ -1,7 +1,9 @@
-﻿using BackEnd.Dtos.DtosViewModel;
+﻿using BackEnd.Dtos;
+using BackEnd.Dtos.DtosViewModel;
 using BackEnd.Iservices;
 using BackEnd.Models;
 using BackEnd.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -15,18 +17,22 @@ namespace BackEnd.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class BookingByActivitiesController : ControllerBase
     {
         private readonly IBookingByActivityRepository _Activity;
         private readonly IBookingRepository bookingRepository;
         private readonly IGuestActivityRepository _guestActivityRp;
+        private readonly IGuestRepository _guestRepository;
         public BookingByActivitiesController(IBookingByActivityRepository bookingByActivity ,
                                              IBookingRepository _bookingRepository ,
-                                             IGuestActivityRepository guestActivityRp)
+                                             IGuestActivityRepository guestActivityRp,
+                                             IGuestRepository guestRepository)
         {
             this._Activity = bookingByActivity;
             this.bookingRepository = _bookingRepository;
             this._guestActivityRp = guestActivityRp;
+            _guestRepository = guestRepository;
         }
         // GET: api/<BookingByActivitiesController>
         [HttpGet]
@@ -44,7 +50,12 @@ namespace BackEnd.Controllers
             var model = _Activity.GetEditActivityViewModel(guestId);
             return model;
         }
-
+        [HttpGet("GetGuestWithName/{name}")]
+        public GuestDtos GetGuestByName(string name)
+        {
+            var guestInfo = _guestRepository.getGuestByName(name);
+            return guestInfo;
+        }
         // POST api/<BookingByActivitiesController>
         [HttpPost("postActivityViewModel")]
         public async Task<ActionResult<AddActivityViewModelDtos>> PostGuestWithActivities(AddActivityViewModelDtos model)

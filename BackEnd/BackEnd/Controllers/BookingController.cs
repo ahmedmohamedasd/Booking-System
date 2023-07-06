@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using BackEnd.Dtos;
 using BackEnd.Dtos.DtosViewModel;
 using BackEnd.Iservices;
 using BackEnd.Models;
 using BackEnd.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -17,6 +19,7 @@ namespace BackEnd.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class BookingController : ControllerBase
     {
         private readonly IGuestTicketRepository _guestTicketRepo;
@@ -24,14 +27,18 @@ namespace BackEnd.Controllers
         private readonly IGuestActivityRepository _guestActivityRp;
         private readonly IGuestRepository _guestRepository;
         private readonly IGuestAreaRepository _guestArea;
+        private readonly IWhereYouFromRepository _placeRepository;
+        private readonly IHowYouKnowUsRepository _socialRepository;
         private readonly IMapper mapper;
-        
-        public BookingController(IBookingRepository _bookingRepository ,
+
+        public BookingController(IBookingRepository _bookingRepository,
                                  IMapper _mapper,
-                                 IGuestActivityRepository _guestActivityRp , 
+                                 IGuestActivityRepository _guestActivityRp,
                                  IGuestTicketRepository guestTicket,
                                  IGuestRepository guestRepository,
-                                 IGuestAreaRepository guestArea)
+                                 IGuestAreaRepository guestArea,
+                                 IHowYouKnowUsRepository socialRepository ,
+                                 IWhereYouFromRepository placeRepository)
         {
             this.mapper = _mapper;
             this.bookingRepository = _bookingRepository;
@@ -39,34 +46,35 @@ namespace BackEnd.Controllers
             this._guestTicketRepo = guestTicket;
             this._guestRepository = guestRepository;
             this._guestArea = guestArea;
+            _placeRepository = placeRepository;
+            _socialRepository = socialRepository;
         }
-        
+
         // GET: api/<BookingController>
         [HttpGet("{date}")]
         public IEnumerable<AreaViewModel> GetListOfAreas(string date)
         {
-           
             DateTime dateTime13 = DateTime.ParseExact(date, "MM-dd-yyyy", null);
             return bookingRepository.GetBookedArea(dateTime13);
         }
-       
+
         [HttpGet("listOfBookingTypes")]
         public IEnumerable<BookingType> GetListOfBookingtype()
         {
             var model = bookingRepository.GetListOfBookingType();
             return model;
         }
-        
+     
         [HttpGet("getListOfTicketViewModel")]
         public TicketViewModel GetListOfTicketViewModel()
         {
             var model = bookingRepository.GetTicketviewModel();
             return model;
         }
-    
-        // POST api/<BookingController>
+     
+       
         [HttpPost("AddGuestTicket")]
-        public async Task<ActionResult< AddGuestViewModel>> AddGuestWithTicketsAsync([FromBody] AddGuestViewModel model)
+        public async Task<ActionResult<AddGuestViewModel>> AddGuestWithTicketsAsync([FromBody] AddGuestViewModel model)
         {
             try
             {
@@ -75,8 +83,16 @@ namespace BackEnd.Controllers
                 {
                     if (model.GuestInfo.NewPlaceName != "")
                     {
-                        int KnowusId = bookingRepository.AddNewPlace(model.GuestInfo.NewPlaceName);
-                        model.GuestInfo.WhereYouId = KnowusId;
+                        var sorting = _placeRepository.GetSorting();
+                        WhereYouFrom whereYou = new WhereYouFrom
+                        {
+                            IsDeleted = false,
+                            PlaceName = model.GuestInfo.NewPlaceName,
+                            Sorting = sorting
+                        };
+                        await _placeRepository.AddPlace(whereYou);
+                        int placeId = _placeRepository.GetIdByName(model.GuestInfo.NewPlaceName);
+                        model.GuestInfo.WhereYouId = placeId;
                     }
                     else
                     {
@@ -87,7 +103,15 @@ namespace BackEnd.Controllers
                 {
                     if (model.GuestInfo.NewSocialName != "")
                     {
-                        int KnowusId = bookingRepository.AddNewSocialWay(model.GuestInfo.NewSocialName);
+                        var sorting = _socialRepository.GetSorting();
+                        HowYouKnowUs howYouKnow = new HowYouKnowUs
+                        {
+                            IsDeleted = false,
+                            WayName = model.GuestInfo.NewSocialName,
+                            Sorting = sorting
+                        };
+                        await _socialRepository.AddWay(howYouKnow);
+                        int KnowusId = _socialRepository.GetIdByName(model.GuestInfo.NewSocialName);
                         model.GuestInfo.KnowUsId = KnowusId;
                     }
                     else
@@ -119,8 +143,8 @@ namespace BackEnd.Controllers
                     PaymentVisa = model.GuestInfo.PaymentVisa,
                     TotalCountOfguest = model.GuestInfo.TotalCountOfguest
                 };
-              //  var guestModel = mapper.Map<Guest>(model.GuestInfo);
-                var GuestId =  bookingRepository.AddNewGuest(guestModel);
+                //  var guestModel = mapper.Map<Guest>(model.GuestInfo);
+                var GuestId = bookingRepository.AddNewGuest(guestModel);
                 List<BookedGuestArea> bookArea = new List<BookedGuestArea>();
                 for (int i = 0; i < model.SelectedArea.Count; i++)
                 {
@@ -132,7 +156,7 @@ namespace BackEnd.Controllers
                     };
                     bookArea.Add(ss);
                 }
-                 await bookingRepository.AddBookedGuestArea(bookArea);
+                await bookingRepository.AddBookedGuestArea(bookArea);
                 List<GuestTicket> guestTickets = new List<GuestTicket>();
                 for (int i = 0; i < model.ListOfTicket.Count; i++)
                 {
@@ -156,13 +180,13 @@ namespace BackEnd.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error in Added Guest");
 
             }
-           
+
         }
-        
+
         [HttpPost("EditGuestTicket")]
         public async Task<ActionResult<AddGuestViewModel>> EditGuestWithTicket(AddGuestViewModel model)
         {
-           try {
+            try {
 
                 if (model.GuestInfo.WhereYouId == 0)
                 {
@@ -212,10 +236,10 @@ namespace BackEnd.Controllers
                     TaxIncluded = model.GuestInfo.TaxIncluded,
                     PaymentVisa = model.GuestInfo.PaymentVisa,
                     TotalCountOfguest = model.GuestInfo.TotalCountOfguest
-                    
+
                 };
-               
-              //  await bookingRepository.DeleteGuestTicket(model.GuestInfo.Id);
+
+                //  await bookingRepository.DeleteGuestTicket(model.GuestInfo.Id);
                 List<GuestTicket> guestTickets = new List<GuestTicket>();
                 for (int i = 0; i < model.ListOfTicket.Count; i++)
                 {
@@ -231,9 +255,9 @@ namespace BackEnd.Controllers
                     guestTickets.Add(ss);
                 }
                 var guestTicketsInDb = _guestTicketRepo.GetListOfGuestTickets(guestModel.Id);
-                if(guestTicketsInDb.Count > 0)
+                if (guestTicketsInDb.Count > 0)
                 {
-                    for(int i = 0; i < guestTicketsInDb.Count; i++)
+                    for (int i = 0; i < guestTicketsInDb.Count; i++)
                     {
                         var index = guestTickets.IndexOf(guestTickets.Find(c => c.TicketId == guestTicketsInDb[i].TicketId));
                         if (index != -1)
@@ -273,25 +297,25 @@ namespace BackEnd.Controllers
             return model;
 
         }
-      
+
         [HttpPost("EditSelectedViewModel")]
         public IEnumerable<AreaViewModel> getSelectedArea(EditSelectedAreaViewModel model)
         {
             var selectedAreas = bookingRepository.GetSelectedBookedArea(model);
             return selectedAreas;
-            
+
         }
-       
+
         [HttpPost("EditGuestArea")]
-        public async Task<IEnumerable< BookedGuestArea>> EditGuestArea(EditGuestAreaViewModel model)
+        public async Task<IEnumerable<BookedGuestArea>> EditGuestArea(EditGuestAreaViewModel model)
         {
             var guestId = model.OldBooking[0].GuestId;
             List<BookedGuestArea> NewModel = new List<BookedGuestArea>();
 
             if (model.NewBooking[0].DateOfBooking.Date == model.OldBooking[0].DateOfBooking.Date)
             {
-               
-                for(int i = 0; i < model.NewBooking.Count; i++)
+
+                for (int i = 0; i < model.NewBooking.Count; i++)
                 {
                     var ss = new BookedGuestArea
                     {
@@ -302,7 +326,7 @@ namespace BackEnd.Controllers
                     NewModel.Add(ss);
                 }
 
-                 await _guestArea.EditGuestArea(guestId, NewModel);
+                await _guestArea.EditGuestArea(guestId, NewModel);
                 return NewModel;
             }
             else
@@ -313,8 +337,8 @@ namespace BackEnd.Controllers
                 {
                     await _guestArea.DeleteGuestArea(guestArea);
                 }
-               // await bookingRepository.DeleteGuestArea(model.OldBooking);
-                for(int i = 0; i < model.NewBooking.Count; i++)
+                // await bookingRepository.DeleteGuestArea(model.OldBooking);
+                for (int i = 0; i < model.NewBooking.Count; i++)
                 {
                     var ss = new BookedGuestArea
                     {
@@ -327,38 +351,53 @@ namespace BackEnd.Controllers
                 await _guestArea.AddGuestArea(NewModel);
                 if (guest.BookingTypeId == 1)
                 {
-                  await  _guestTicketRepo.EditGuestTicketsDateBooking(guestId, model.NewBooking[0].DateOfBooking);
+                    await _guestTicketRepo.EditGuestTicketsDateBooking(guestId, model.NewBooking[0].DateOfBooking);
                 }
-                if(guest.BookingTypeId != 1)
+                if (guest.BookingTypeId != 1)
                 {
-                  await  _guestActivityRp.EditGuestActivityDateBooking(guestId, model.NewBooking[0].DateOfBooking);
+                    await _guestActivityRp.EditGuestActivityDateBooking(guestId, model.NewBooking[0].DateOfBooking);
 
                 }
                 return NewModel;
             }
-        
+
         }
-    
+
         [HttpGet("GetEditTicketViewModel/{guestId}")]
         public EditTicketViewModel GetEditTicketViewModel(int guestId)
         {
             var model = bookingRepository.GetEditTicketViewModel(guestId);
             return model;
         }
+       
         [HttpPut("cancelGuestBooking/{guestId}")]
         public async Task<ActionResult<int>> CancelGuestBooking(int guestId)
         {
+            await _guestArea.DeleteGuestArea(guestId);
             var result = await _guestRepository.CancelGuest(guestId);
-            if(result == true)
+            if (result == true)
             {
                 return guestId;
             }
             return StatusCode(StatusCodes.Status404NotFound, "Guest Not Found");
         }
+       
         [HttpPut("undoCancelGuestBooking/{guestId}")]
-        public async Task<ActionResult<int>> UndoCancelGuestBooking(int guestId)
+        public async Task<ActionResult<int>> UndoCancelGuestBooking(int guestId , List<SelectedArea> model)
         {
-            var result = await _guestRepository.UndoCancelGuest(guestId);
+            List<BookedGuestArea> bookedGuests = new List<BookedGuestArea>();
+            for(int i = 0; i < model.Count; i++)
+            {
+                var ss = new BookedGuestArea
+                {
+                    AreaId = model[i].AreaId,
+                    DateOfBooking = model[i].DateOfBooking,
+                    GuestId = guestId
+                };
+                bookedGuests.Add(ss);
+            }
+            await _guestArea.AddGuestArea(bookedGuests);
+            var result = await _guestRepository.UndoCancelGuest(guestId , model[0].DateOfBooking);
             if (result == true)
             {
                 return guestId;
@@ -370,12 +409,12 @@ namespace BackEnd.Controllers
         public async Task<ActionResult<int>> DeleteGuestBooking(int guestId)
         {
             var guestInDb = _guestRepository.GetGuestById(guestId);
-            if(guestInDb != null)
+            if (guestInDb != null)
             {
-               await _guestRepository.DeleteGuest(guestId);
-               if(guestInDb.BookingTypeId == 1)
+                await _guestRepository.DeleteGuest(guestId);
+                if (guestInDb.BookingTypeId == 1)
                 {
-                  await  _guestTicketRepo.DeleteGuestTickets(guestId);
+                    await _guestTicketRepo.DeleteGuestTickets(guestId);
                 }
                 else
                 {
@@ -388,8 +427,53 @@ namespace BackEnd.Controllers
                 }
             }
             return guestId;
+
+        }
+        
+        [HttpGet("GetGuestWithPhoneAndDate/{dateOfFrom}/{dateOfTo}/{phone}")]
+        public IEnumerable<GuestDtos> GetGuestWithPhone(string dateOfFrom, string dateOfTo , string phone)
+        {
+            DateTime DateFrom = DateTime.ParseExact(dateOfFrom, "MM-dd-yyyy", null);
+            DateTime DateTo = DateTime.ParseExact(dateOfTo, "MM-dd-yyyy", null);
+            var model = _guestRepository.GetGuestWithPhoneNumber(DateFrom, DateTo, phone);
+            return model;
+        }
+        
+        [HttpGet("GetGuestWithNameAndDate/{dateOfFrom}/{dateOfTo}/{name}")]
+        public IEnumerable<GuestDtos> GetGuestWithName(string dateOfFrom, string dateOfTo, string name)
+        {
+            DateTime DateFrom = DateTime.ParseExact(dateOfFrom, "MM-dd-yyyy", null);
+            DateTime DateTo = DateTime.ParseExact(dateOfTo, "MM-dd-yyyy", null);
+            var model = _guestRepository.GetGuestWithName(DateFrom, DateTo, name);
+            return model;
+        }
+      
+        [HttpGet("GetGuestWithNameOrPhone/{typeOfSearch}/{valueOfSearch}")]
+        public IEnumerable<GuestDtos> GetGuestWithName(int typeOfSearch, string valueOfSearch)
+        {
+           if(typeOfSearch == 1)
+            {
+                var model = _guestRepository.GetGuestWithName(valueOfSearch);
+                return model;
+            }
+            else
+            {
+                var model = _guestRepository.GetGuestWithPhoneNumber(valueOfSearch);
+                return model;
+            }
            
         }
-
+       [HttpGet("GetGuestDetailsById/{id}")]
+        public listGuestViewModel GetGuestDetailsById(int id)
+        {
+            var model = bookingRepository.GetGuestDetailsById(id);
+            return model;
+        }
+        [HttpGet("filterAddGuestWithPhone/{phone}")]
+        public GuestDtos filterAddGuestWithPhone(string phone)
+        {
+            var model = _guestRepository.getGuestByPhone(phone);
+            return model;
+        }
     }
 }

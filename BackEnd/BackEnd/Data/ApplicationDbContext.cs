@@ -1,4 +1,6 @@
 ﻿using BackEnd.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BackEnd.Data
 {
-    public class ApplicationDbContext :DbContext
+    public class ApplicationDbContext :IdentityDbContext
     {
         public DbSet<Area> Areas { get; set; }
         public DbSet<BlockArea> BlockAreas { get; set; }
@@ -20,13 +22,14 @@ namespace BackEnd.Data
         public DbSet<Guest> Guests { get; set; }
         public DbSet<GuestActivity> GuestActivities { get; set; }
         public DbSet<GuestTicket> GuestTickets { get; set; }
-
-
+        public DbSet<Event> Events { get; set; }
+        public DbSet<GuestEvent> GuestEvents { get; set; }
         public DbSet<BookedGuestArea> BookedGuestAreas { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             // Many to Many Guest , Area in BookedGuestArea
             modelBuilder.Entity<BookedGuestArea>().HasKey(cc => new { cc.GuestId, cc.AreaId });
             modelBuilder.Entity<BookedGuestArea>().HasOne(c => c.Guest)

@@ -47,6 +47,20 @@ namespace BackEnd.service
             return model;
         }
 
+        public async Task<List<BookedGuestArea>> DeleteGuestArea(int guestId)
+        {
+            var guestAreas = _context.BookedGuestAreas.Where(c => c.GuestId == guestId).ToList();
+            if(guestAreas.Count > 0)
+            {
+                for(int i = 0; i < guestAreas.Count; i++)
+                {
+                    _context.BookedGuestAreas.Remove(guestAreas[i]);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            return guestAreas;
+        }
+
         public async Task<List<BookedGuestArea>> EditGuestArea(int guestId, List<BookedGuestArea> model)
         {
             var areaInDb = _context.BookedGuestAreas.Where(c => c.GuestId == guestId).ToList();

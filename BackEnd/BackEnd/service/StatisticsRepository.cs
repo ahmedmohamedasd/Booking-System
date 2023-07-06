@@ -128,13 +128,40 @@ namespace BackEnd.service
                                     testModel.Find(c => c.Date == listofIndex[z].Date 
                                                      && c.BookTypeName == listofIndex[z].BookTypeName));
                         testModel.RemoveAt(index);
-
                     }
                 }       
                
             }
             return guests;
 
+        }
+
+        public IEnumerable<Statistics> GetGatheringStatistics(DateTime dateFrom, DateTime dateTo, int BookTypeId)
+        {
+            if(BookTypeId == 1)
+            {
+                IEnumerable<Statistics> model = _context.Guests
+                   .Where(c => c.DateOfBooking >= dateFrom && c.DateOfBooking <= dateTo && c.IsCanceled == false  && c.BookingTypeId == BookTypeId)
+                   .GroupBy(p => new { p.Phone })
+                   .Select(c => new Statistics
+                   {
+                       Name = c.Key.Phone,
+                       Value = c.Count()
+                   }).OrderByDescending(c=>c.Value).Take(10);
+                return model;
+            }
+            else
+            {
+                IEnumerable<Statistics> model = _context.Guests
+                  .Where(c => c.DateOfBooking >= dateFrom && c.DateOfBooking <= dateTo && c.IsCanceled == false && c.BookingTypeId == BookTypeId)
+                  .GroupBy(p => new { p.Name })
+                  .Select(c => new Statistics
+                  {
+                      Name = c.Key.Name,
+                      Value = c.Count()
+                  }).OrderByDescending(c => c.Value).Take(10); 
+                return model;
+            }
         }
     }
 }

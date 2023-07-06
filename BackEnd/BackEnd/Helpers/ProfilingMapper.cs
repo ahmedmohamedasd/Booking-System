@@ -16,6 +16,7 @@ namespace BackEnd.Helpers
             CreateMap<Guest, GuestDtos>().ReverseMap();
             CreateMap<Activity, ActivityDtos>().ReverseMap();
             CreateMap<Ticket, TicketDtos>().ReverseMap();
+            CreateMap<GuestEvent, GuestEventDtos>().ReverseMap();
         }
     }
 }
