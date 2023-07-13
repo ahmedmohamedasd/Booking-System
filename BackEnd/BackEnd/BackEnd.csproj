@@ -19,6 +19,8 @@
     <Compile Remove="Migrations\20230403203050_UpdateTimeFormat.Designer.cs" />
     <Compile Remove="Migrations\20230530172849_DateOfBooking_GuestTicket.cs" />
     <Compile Remove="Migrations\20230530172849_DateOfBooking_GuestTicket.Designer.cs" />
+    <Compile Remove="Migrations\20230708162318_AddArea.cs" />
+    <Compile Remove="Migrations\20230708162318_AddArea.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

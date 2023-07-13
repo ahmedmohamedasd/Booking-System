@@ -1,4 +1,5 @@
-﻿using BackEnd.Models;
+﻿using BackEnd.Dtos;
+using BackEnd.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,10 @@ namespace BackEnd.Iservices
         Task<Event> EditEvent(Event model);
         Task<Event> GetEventById(int id);
         Task<Event> DeleteEvent(int id);
-        Task<Event> UndoDeleteEvent(int id);
-        List<Event> GetListOfEvents(DateTime dateOfNow);
+        Task<Event> UndoDeleteEvent(int id); 
+        List<EventDtos> GetListOfEvents(DateTime dateOfNow);
+        List<EventDtos> GetListOfEventsWithDate(DateTime dateOfNow);
+
         List<Event> GetListOfEvents();
 
 

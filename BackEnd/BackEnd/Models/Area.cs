@@ -13,6 +13,7 @@ namespace BackEnd.Models
         public string AreaName { get; set; }
         public int AreaRanking { get; set; }
         public int AreaMinimum { get; set; }
+        public bool IsDeleted { get; set; }
         public ICollection<BookedGuestArea> BookedGuestAreas { get; set; }
 
     }

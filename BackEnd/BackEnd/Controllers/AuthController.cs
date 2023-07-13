@@ -252,12 +252,13 @@ namespace BackEnd.Controllers
             if(user.UserName != model.UserName)
             {
                 user.UserName = model.UserName;
-              var result =   await _userManager.UpdateAsync(user);
+                var result =   await _userManager.UpdateAsync(user);
                 if (!result.Succeeded)
                 {
                     return BadRequest("UserName is exist Change it ");
                 }
             }
+            var claimList = model.Claims;
             var userclaimsInDb =await _userManager.GetClaimsAsync(user);
             for(int i = 0; i < userclaimsInDb.Count; i++)
             {
@@ -266,9 +267,14 @@ namespace BackEnd.Controllers
                 var value = userclaimsInDb[i].Value;
                 var index = type.IndexOf('_');
                 var firstDigit = type.Substring(0, index);
-                var test = type;
                 var secondDigit = type.Substring(index +1);
                 var claimModel = model.Claims.Find(c => c.ClaimType == firstDigit);
+                var listIndex = claimList.IndexOf(claimList.Find(c => c.ClaimType.ToLower() == "users"));
+                if(listIndex != -1)
+                {
+                claimList.Remove(claimList[listIndex]);
+
+                }
                 if(claimModel != null)
                 {
                     switch (secondDigit)
@@ -276,15 +282,13 @@ namespace BackEnd.Controllers
                         case "Show":
                             if(claimModel.Show.ToString().ToLower() != value)
                             {
-                                await _userManager.ReplaceClaimAsync(user, userclaimsInDb[i], new Claim(type = firstDigit + "_Show", claimModel.Show.ToString().ToLower()));
-                               
+                                await _userManager.ReplaceClaimAsync(user, userclaimsInDb[i], new Claim(type = firstDigit + "_Show", claimModel.Show.ToString().ToLower()));  
                             }
                         break;
                         case "Add":
                             if (claimModel.Add.ToString().ToLower() != value)
                             {
                                 await _userManager.ReplaceClaimAsync(user, userclaimsInDb[i], new Claim(type = firstDigit + "_Add", claimModel.Add.ToString().ToLower()));
-
                             }
                             break;
                         case "Edit":
@@ -304,8 +308,20 @@ namespace BackEnd.Controllers
 
                     }
                 }
+
         
             }
+            if(claimList.Count > 0)
+            {
+                for (int i = 0; i < claimList.Count; i++)
+                {
+                    var testResult = await _userManager.AddClaimAsync(user, new Claim(model.Claims[i].ClaimType + "_Show", model.Claims[i].Show ? "true" : "false"));
+                    testResult = await _userManager.AddClaimAsync(user, new Claim(model.Claims[i].ClaimType + "_Add", model.Claims[i].Add ? "true" : "false"));
+                    testResult = await _userManager.AddClaimAsync(user, new Claim(model.Claims[i].ClaimType + "_Edit", model.Claims[i].Edit ? "true" : "false"));
+                    testResult = await _userManager.AddClaimAsync(user, new Claim(model.Claims[i].ClaimType + "_Delete", model.Claims[i].Delete ? "true" : "false"));
+                }
+            }
+           
             return Ok();
         }
     }

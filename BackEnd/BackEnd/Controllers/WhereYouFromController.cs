@@ -1,5 +1,7 @@
 ﻿using BackEnd.Iservices;
 using BackEnd.Models;
+using BackEnd.Validations;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +16,7 @@ namespace BackEnd.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class WhereYouFromController : ControllerBase
     {
         private readonly IWhereYouFromRepository _whereYouFromRepository;
@@ -24,6 +26,7 @@ namespace BackEnd.Controllers
         }
         // GET: api/<ActivityController>
         [HttpGet("ListOfPlaces")]
+       // [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "Booking_Show")]
         public List<WhereYouFrom> Get()
         {
             var model = _whereYouFromRepository.GetListOfPlaces();
@@ -51,6 +54,13 @@ namespace BackEnd.Controllers
         {
             try
             {
+                model.PlaceName = "";
+                var placeValidator = new WhereYouFromValidations();
+                var result = placeValidator.Validate(model);
+                if (!result.IsValid)
+                {
+                    return BadRequest(result.Errors);
+                }
                 await _whereYouFromRepository.AddPlace(model);
                 return model;
             }

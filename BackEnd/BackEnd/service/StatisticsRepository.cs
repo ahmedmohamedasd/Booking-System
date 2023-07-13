@@ -24,12 +24,11 @@ namespace BackEnd.service
 
         public IEnumerable<PlaceStatistics> GetPlaceStatistics(DateTime dateFrom, DateTime dateTo)
         {
-
             var listOfGuest = _context.Guests.Where(c => c.DateOfBooking >= dateFrom && c.DateOfBooking <= dateTo && c.IsCanceled == false).ToList();
             IEnumerable<PlaceStatistics> model = _context.Guests
-                    .Where(c => c.DateOfBooking >= dateFrom 
-                                && c.DateOfBooking <= dateTo 
-                                && c.IsCanceled == false 
+                    .Where(c => c.DateOfBooking.Date >= dateFrom.Date
+                                && c.DateOfBooking.Date <= dateTo.Date
+                                && c.IsCanceled == false
                                 && c.BookingTypeId == 1)
                     .GroupBy(p => new { p.WhereYouFrom.PlaceName })
                     .Select(c => new PlaceStatistics
@@ -38,7 +37,25 @@ namespace BackEnd.service
                         Value = c.Count()
 
                     });
-            return model;
+            IEnumerable<PlaceStatistics> modelEvent = _context.GuestEvents
+                   .Where(c => c.DateOfEvent.Date >= dateFrom.Date
+                               && c.DateOfEvent.Date <= dateTo.Date
+                               && c.IsCanceled == false)
+                   .GroupBy(p => new { p.WhereYouFrom.PlaceName })
+                   .Select(c => new PlaceStatistics
+                   {
+                       Name = c.Key.PlaceName,
+                       Value = c.Count()
+
+                   });
+            IEnumerable<PlaceStatistics> grandtotal = model.Concat(modelEvent)
+                             .GroupBy(x => x.Name)
+                             .Select(cc => new PlaceStatistics
+                             {
+                                 Name = cc.Key,
+                                 Value = cc.Sum(c => c.Value)
+                             });
+            return grandtotal;
         }
 
         public IEnumerable<SocialWayStatistics> GetSocialStatistics(DateTime dateFrom, DateTime dateTo)
@@ -54,14 +71,35 @@ namespace BackEnd.service
                         Name = c.Key.WayName,
                         Value = c.Count()
                     });
-            return model;
+            IEnumerable<SocialWayStatistics> modelEvent = _context.GuestEvents
+              .Where(c => c.DateOfEvent.Date >= dateFrom.Date
+                          && c.DateOfEvent.Date <= dateTo.Date
+                          && c.IsCanceled == false)
+              .GroupBy(p => new { p.HowYouKnowUs.WayName })
+              .Select(c => new SocialWayStatistics
+              {
+                  Name = c.Key.WayName,
+                  Value = c.Count()
+
+              });
+            IEnumerable<SocialWayStatistics> grandtotal =
+                        model.Concat(modelEvent)
+                             .GroupBy(x => x.Name)
+                             .Select(cc => new SocialWayStatistics
+                             {
+                                 Name = cc.Key,
+                                 Value = cc.Sum(c => c.Value)
+                             });
+            return grandtotal;
         }
 
         public IEnumerable<TicketStatistics> GetTicketStatistics(DateTime dateFrom, DateTime dateTo)
         {
             var Testguest = _context.GuestTickets.Where(c => c.Guest.IsCanceled == false).ToList();
             IEnumerable<TicketStatistics> model = _context.GuestTickets
-                   .Where(c => c.DateOfBooking >= dateFrom && c.DateOfBooking <= dateTo && c.Guest.IsCanceled == false)
+                   .Where(c => c.DateOfBooking.Date >= dateFrom.Date &&
+                          c.DateOfBooking.Date <= dateTo.Date &&
+                          c.Guest.IsCanceled == false)
                    .GroupBy(p => new { p.Ticket.TicketName })
                    .Select(c => new TicketStatistics
                    {
@@ -73,7 +111,9 @@ namespace BackEnd.service
         public IEnumerable<ActivityStatistics> GetActivityStatistics(DateTime dateFrom, DateTime dateTo)
         {
             IEnumerable<ActivityStatistics> model = _context.GuestActivities
-                    .Where(c => c.DateOfBooking >= dateFrom && c.DateOfBooking <= dateTo && c.Guest.IsCanceled == false)
+                    .Where(c => c.DateOfBooking.Date >= dateFrom.Date &&
+                           c.DateOfBooking.Date <= dateTo.Date &&
+                           c.Guest.IsCanceled == false)
                     .GroupBy(p => new { p.Activity.ActivityName })
                     .Select(c => new ActivityStatistics
                     {
@@ -86,7 +126,9 @@ namespace BackEnd.service
         public IEnumerable<GuestStatistics> GetGuestStatistics(DateTime dateFrom, DateTime dateTo)
         {
             List<GuestTestModel> model = _context.Guests
-                    .Where(c => c.DateOfBooking >= dateFrom && c.DateOfBooking <= dateTo && c.IsCanceled == false)
+                    .Where(c => c.DateOfBooking.Date >= dateFrom.Date &&
+                           c.DateOfBooking.Date <= dateTo.Date && 
+                           c.IsCanceled == false)
                     .GroupBy(p => new { p.DateOfBooking.Month, p.BookingType.Name })
                     .Select(c => new GuestTestModel
                     {
@@ -141,7 +183,9 @@ namespace BackEnd.service
             if(BookTypeId == 1)
             {
                 IEnumerable<Statistics> model = _context.Guests
-                   .Where(c => c.DateOfBooking >= dateFrom && c.DateOfBooking <= dateTo && c.IsCanceled == false  && c.BookingTypeId == BookTypeId)
+                   .Where(c => c.DateOfBooking.Date >= dateFrom.Date &&
+                          c.DateOfBooking.Date <= dateTo.Date &&
+                          c.IsCanceled == false  && c.BookingTypeId == BookTypeId)
                    .GroupBy(p => new { p.Phone })
                    .Select(c => new Statistics
                    {

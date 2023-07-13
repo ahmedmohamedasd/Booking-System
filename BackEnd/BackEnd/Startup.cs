@@ -128,6 +128,7 @@ namespace BackEnd
             services.AddTransient<IStatisticsRepository, StatisticsRepository>();
             services.AddTransient<IEventRepository, EventRepository>();
             services.AddTransient<IGuestEventRepository, GuestEventRepository>();
+            services.AddTransient<IDepositWayesRepository, DepositWayRepository>();
             services.AddAutoMapper(typeof(Startup));
             services.AddControllersWithViews()
             .AddNewtonsoftJson(options =>

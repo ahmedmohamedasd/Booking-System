@@ -23,12 +23,30 @@ namespace BackEnd.service
             await context.SaveChangesAsync();
             return result.Entity;
         }
-
+        public async Task<Area> UndoDeleteArea(int id)
+        {
+            var area = context.Areas.FirstOrDefault(c => c.Id == id);
+            area.IsDeleted = false;
+            context.Areas.Update(area);
+            await context.SaveChangesAsync();
+            return area;
+        }
         public async Task<Area> DeleteArea(int id)
         {
             var model = await context.Areas.FirstOrDefaultAsync(c => c.Id == id);
-            context.Areas.Remove(model);
-            await context.SaveChangesAsync();
+            var TestExistingArea = context.BookedGuestAreas.Where(c => c.AreaId == id).ToList();
+            var closedarea = context.BlockAreas.Where(c => c.AreaId == id).ToList();
+            if(TestExistingArea.Count > 0 || closedarea.Count >0)
+            {
+                model.IsDeleted = true;
+                context.Areas.Update(model);
+                await context.SaveChangesAsync();
+            }
+            else
+            {
+                context.Areas.Remove(model);
+                await context.SaveChangesAsync();
+            }
             return model;
            
         }

@@ -16,7 +16,6 @@ namespace BackEnd.Models
         public DateTime DateOfBlock { get; set; }
         public string? Note { get; set; }
         public bool IsBlocked { get; set; } = false;
-
         [ForeignKey("Area")]
         public int AreaId { get; set; }
         public Area Area { get; set; }

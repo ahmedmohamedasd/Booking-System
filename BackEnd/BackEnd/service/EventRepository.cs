@@ -1,4 +1,5 @@
 ﻿using BackEnd.Data;
+using BackEnd.Dtos;
 using BackEnd.Iservices;
 using BackEnd.Models;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ namespace BackEnd.service
     {
         private readonly ApplicationDbContext _context;
         private readonly IGuestEventRepository _guestEventRepo;
+        
         public EventRepository(ApplicationDbContext context , 
                                IGuestEventRepository guestEventRepository)
         {
@@ -65,11 +67,74 @@ namespace BackEnd.service
             return await events;
         }
 
-        public List<Event> GetListOfEvents(DateTime dateOfNow)
+        public List<EventDtos> GetListOfEvents(DateTime dateOfNow)
         {
-            var events = _context.Events.Where(c => c.DateOfEvent >= dateOfNow).ToList();
-            return events;
+            List<EventDtos> model = new List<EventDtos>();
+            var events = _context.Events.Where(c => c.DateOfEvent.Date >= dateOfNow.Date).ToList();
+            for(int i = 0; i < events.Count; i++)
+            {
+                var guestEvents = _context.GuestEvents.Where(c => c.EventId == events[i].Id).ToList();
+                var count = guestEvents.Count;
+                
+                var status = "";
+                if(dateOfNow.Date > events[i].DateOfEvent)
+                {
+                    status = "NotAvailable";
+                }
+                else
+                {
+                    status = "Available";
+                }
+                var ss = new EventDtos
+                {
+                    GuestEvents = guestEvents,
+                    Count = count,
+                    DateOfEvent = events[i].DateOfEvent,
+                    EventName = events[i].EventName,
+                    EventPrice = events[i].EventPrice,
+                    Id = events[i].Id,
+                    IsDeleted = events[i].IsDeleted,
+                    Status = status
+                };
+                model.Add(ss);
+            }
+            return model;
         }
+
+        public List<EventDtos> GetListOfEventsWithDate(DateTime dateOfNow)
+        {
+            List<EventDtos> model = new List<EventDtos>();
+            var events = _context.Events.OrderByDescending(c=>c.DateOfEvent).ToList();
+            for (int i = 0; i < events.Count; i++)
+            {
+                var guestEvents = _context.GuestEvents.Where(c => c.EventId == events[i].Id).ToList();
+                var count = guestEvents.Count;
+
+                var status = "";
+                if (dateOfNow.Date > events[i].DateOfEvent)
+                {
+                    status = "NotAvailable";
+                }
+                else
+                {
+                    status = "Available";
+                }
+                var ss = new EventDtos
+                {
+                    GuestEvents = guestEvents,
+                    Count = count,
+                    DateOfEvent = events[i].DateOfEvent,
+                    EventName = events[i].EventName,
+                    EventPrice = events[i].EventPrice,
+                    Id = events[i].Id,
+                    IsDeleted = events[i].IsDeleted,
+                    Status = status
+                };
+                model.Add(ss);
+            }
+            return model;
+        }
+
         public List<Event> GetListOfEvents()
         {
             var events = _context.Events.OrderByDescending(c=>c.DateOfEvent).ToList();

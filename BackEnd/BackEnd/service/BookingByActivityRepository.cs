@@ -58,9 +58,9 @@ namespace BackEnd.service
                     activityModels.Add(AM);
                 }
             }
-            var depositWayList = _context.DepositWays.ToList();
-            var whereYouFromList = _context.WhereYouFroms.OrderBy(c=>c.Sorting).ToList();
-            var howYouKnowUsList = _context.HowYouKnowUss.OrderBy(c=>c.Sorting).ToList();
+            var depositWayList = _context.DepositWays.Where(c => c.IsDeleted == false).OrderBy(c => c.Sorting).ToList();
+            var whereYouFromList = _context.WhereYouFroms.Where(c => c.IsDeleted == false).OrderBy(c=>c.Sorting).ToList();
+            var howYouKnowUsList = _context.HowYouKnowUss.Where(c => c.IsDeleted == false).OrderBy(c=>c.Sorting).ToList();
             var model = new ActivityViewModel
             {
                 Activities = activityModels,
@@ -79,10 +79,10 @@ namespace BackEnd.service
 
         public EditActivityViewModel GetEditActivityViewModel(int guestId)
         {
-            var guest = _context.Guests.Where(c => c.Id == guestId).ToList();
-            var whereYouFrom = _context.WhereYouFroms.OrderBy(c=>c.Sorting).ToList();
-            var HowYouKnowUs = _context.HowYouKnowUss.OrderBy(c=>c.Sorting).ToList();
-            var DepositWayes = _context.DepositWays.ToList();
+            var guest = _context.Guests.Where(c => c.Id == guestId).FirstOrDefault();
+            var whereYouFrom = _context.WhereYouFroms.Where(c => c.IsDeleted == false || c.Id == guest.WhereYouId).OrderBy(c=>c.Sorting).ToList();
+            var HowYouKnowUs = _context.HowYouKnowUss.Where(c => c.IsDeleted == false || c.Id == guest.KnowUsId).OrderBy(c=>c.Sorting).ToList();
+            var DepositWayes = _context.DepositWays.Where(c => c.IsDeleted == false || c.Id == guest.DepositWayId).OrderBy(c => c.Sorting).ToList();
             var GuestActivities = _context.GuestActivities.Where(c => c.GuestId == guestId).ToList();
             var activities = _context.Activitys.OrderBy(c=>c.Sorting).ToList();
             List<ActivityModel> activityModels = new List<ActivityModel>();

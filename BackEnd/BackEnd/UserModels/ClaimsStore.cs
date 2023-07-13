@@ -14,7 +14,8 @@ namespace BackEnd.UserModels
             new Claim("Area","Area"),
             new Claim("Ticket","Ticket"),
             new Claim("Activity","Activity"),
-            new Claim("Users","Users")  
+            new Claim("Users","Users")  ,
+            new Claim("Event" , "Event")
         };
     }
 }

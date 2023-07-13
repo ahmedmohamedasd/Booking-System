@@ -29,7 +29,6 @@ namespace BackEnd.Controllers
         [HttpGet]
         public IEnumerable<Area> Get()
         {
-            
             return areaRepository.GetAllAreas();
         }
 
@@ -43,10 +42,8 @@ namespace BackEnd.Controllers
             else
             {
                 return result;
-            }
-            
+            }   
         }
-
         // POST api/<AreasController>
         [HttpPost]
         public async Task<ActionResult<Area>> PostArea([FromBody] Area model)
@@ -64,7 +61,18 @@ namespace BackEnd.Controllers
             }
             
         }
-
+      
+        [HttpDelete("UndoDeleteArea/{id}")]
+        public async Task<ActionResult<Area>> UndoDeleteArea(int id)
+        {
+            var area = await areaRepository.GetAreaById(id);
+            if(area == null)
+            {
+                return NotFound("This area Not Found");
+            }
+            await areaRepository.UndoDeleteArea(id);
+            return area;
+        }
         // PUT api/<AreasController>/5
         [HttpPut("{id}")]
         public async Task<ActionResult<Area>> UpdateArea(int id,  Area model)
@@ -93,12 +101,12 @@ namespace BackEnd.Controllers
         }
 
         // DELETE api/<AreasController>/5
-        [HttpDelete("{id}")]
+        [HttpDelete("DeleteArea/{id}")]
         public async Task<ActionResult<Area>> Delete(int id)
         {
             try
             {
-                var areaInDb =  areaRepository.GetAreaById(id);
+                var areaInDb = await areaRepository.GetAreaById(id);
                 if (areaInDb == null)
                 {
                     return NotFound("Area Not Found");

@@ -143,7 +143,7 @@ namespace BackEnd.service
         public TicketViewModel GetTicketviewModel()
         {
             var ticketList = context.tickets.OrderBy(c=>c.Sorting).ToList();
-            var depositWayList = context.DepositWays.ToList();
+            var depositWayList = context.DepositWays.Where(c => c.IsDeleted == false).OrderBy(c => c.Sorting).ToList();
             var whereYouFromList = context.WhereYouFroms.Where(c => c.IsDeleted == false).OrderBy(c=>c.Sorting).ToList();
             var howYouKnowUsList = context.HowYouKnowUss.Where(c => c.IsDeleted == false).OrderBy(c=>c.Sorting).ToList();
             var model = new TicketViewModel
@@ -227,13 +227,14 @@ namespace BackEnd.service
 
         public EditTicketViewModel GetEditTicketViewModel(int guestId)
         {
+            var guest = context.Guests.Where(c => c.Id == guestId).FirstOrDefault();
             List<TicketModel> ticketModels = new List<TicketModel>();
             var ticketList = context.tickets.ToList();
             var guestTickets = context.GuestTickets.Where(c => c.GuestId == guestId).ToList();
 
-            var depositWayList = context.DepositWays.ToList();
-            var whereYouFromList = context.WhereYouFroms.Where(c=>c.IsDeleted == false).OrderBy(c=>c.Sorting).ToList();
-            var howYouKnowUsList = context.HowYouKnowUss.Where(c => c.IsDeleted == false).OrderBy(c=>c.Sorting).ToList();
+            var depositWayList = context.DepositWays.Where(c=>c.IsDeleted == false || c.Id == guest.DepositWayId).OrderBy(c=>c.Sorting).ToList();
+            var whereYouFromList = context.WhereYouFroms.Where(c=>c.IsDeleted == false || c.Id == guest.WhereYouId).OrderBy(c=>c.Sorting).ToList();
+            var howYouKnowUsList = context.HowYouKnowUss.Where(c => c.IsDeleted == false || c.Id == guest.KnowUsId).OrderBy(c=>c.Sorting).ToList();
             if(ticketList.Count > 0  )
             {
                for(int i = 0; i < ticketList.Count; i++)
@@ -267,8 +268,6 @@ namespace BackEnd.service
                 }
 
             }
-
-
             var model = new EditTicketViewModel
             {
                 Tickets = ticketModels,
@@ -277,9 +276,7 @@ namespace BackEnd.service
                 HowYouKnowUs = howYouKnowUsList
             };
             return model;
-        }
-
-      
+        }    
         public async Task<Guest> EditGuest(Guest model)
         {
             var guest = context.Guests.FirstOrDefault(c => c.Id == model.Id);

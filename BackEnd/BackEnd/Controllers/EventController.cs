@@ -1,4 +1,5 @@
-﻿using BackEnd.Iservices;
+﻿using BackEnd.Dtos;
+using BackEnd.Iservices;
 using BackEnd.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,13 @@ namespace BackEnd.Controllers
         {
             var dateOfNow = DateTime.UtcNow.Date;
             var model = _eventRepository.GetListOfEvents();
+            return model;
+        }
+        [HttpGet("GetListOfEventsWithDate")]
+        public List<EventDtos> GetListOfeventWithDate()
+        {
+            var dateOfNow = DateTime.UtcNow.Date;
+            var model = _eventRepository.GetListOfEventsWithDate(dateOfNow);
             return model;
         }
         [HttpPost("AddEvent")]

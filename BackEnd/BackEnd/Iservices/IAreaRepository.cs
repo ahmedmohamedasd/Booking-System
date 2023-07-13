@@ -13,6 +13,7 @@ namespace BackEnd.Iservices
         Task<Area> AddArea(Area area);
         Task<Area> UpdateArea(Area area);
         Task<Area> DeleteArea(int id);
+        Task<Area> UndoDeleteArea(int id);
 
     }
 }

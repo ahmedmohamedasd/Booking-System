@@ -1,4 +1,5 @@
-﻿using BackEnd.Dtos;
+﻿using AutoMapper;
+using BackEnd.Dtos;
 using BackEnd.Dtos.DtosViewModel;
 using BackEnd.Iservices;
 using BackEnd.Models;
@@ -24,15 +25,18 @@ namespace BackEnd.Controllers
         private readonly IBookingRepository bookingRepository;
         private readonly IGuestActivityRepository _guestActivityRp;
         private readonly IGuestRepository _guestRepository;
+        private readonly IMapper _mapper;
         public BookingByActivitiesController(IBookingByActivityRepository bookingByActivity ,
                                              IBookingRepository _bookingRepository ,
                                              IGuestActivityRepository guestActivityRp,
-                                             IGuestRepository guestRepository)
+                                             IGuestRepository guestRepository,
+                                             IMapper maper)
         {
             this._Activity = bookingByActivity;
             this.bookingRepository = _bookingRepository;
             this._guestActivityRp = guestActivityRp;
             _guestRepository = guestRepository;
+            _mapper = maper;
         }
         // GET: api/<BookingByActivitiesController>
         [HttpGet]
@@ -87,31 +91,33 @@ namespace BackEnd.Controllers
                         model.GuestInfo.KnowUsId = 1;
                     }
                 }
-                Guest guestModel = new Guest
-                {
-                    Id = model.GuestInfo.Id,
-                    BookingTypeId = model.GuestInfo.BookingTypeId,
-                    DateOfBooking = model.GuestInfo.DateOfBooking,
-                    DateOfDeposit = model.GuestInfo.DateOfDeposit,
-                    DebitNote = model.GuestInfo.DebitNote,
-                    DepositWayId = model.GuestInfo.DepositWayId,
-                    DiscountByAmount = model.GuestInfo.DiscountByAmount,
-                    DiscountByPercentage = model.GuestInfo.DiscountByPercentage,
-                    Deposit = model.GuestInfo.Deposit,
-                    Email = model.GuestInfo.Email,
-                    GrandTotal = model.GuestInfo.GrandTotal,
-                    Name = model.GuestInfo.Name,
-                    IsCanceled = false,
-                    KnowUsId = model.GuestInfo.KnowUsId,
-                    WhereYouId = model.GuestInfo.WhereYouId,
-                    LeftToPay = model.GuestInfo.LeftToPay,
-                    Identifier = model.GuestInfo.Identifier,
-                    PaymentCash = model.GuestInfo.PaymentCash,
-                    Phone = model.GuestInfo.Phone,
-                    TaxIncluded = model.GuestInfo.TaxIncluded,
-                    PaymentVisa = model.GuestInfo.PaymentVisa,
-                    TotalCountOfguest = model.GuestInfo.TotalCountOfguest
-                };
+                var guestModel = _mapper.Map<Guest>(model.GuestInfo);
+                guestModel.IsCanceled = false;
+                //Guest guestModel = new Guest
+                //{
+                //    Id = model.GuestInfo.Id,
+                //    BookingTypeId = model.GuestInfo.BookingTypeId,
+                //    DateOfBooking = model.GuestInfo.DateOfBooking,
+                //    DateOfDeposit = model.GuestInfo.DateOfDeposit,
+                //    DebitNote = model.GuestInfo.DebitNote,
+                //    DepositWayId = model.GuestInfo.DepositWayId,
+                //    DiscountByAmount = model.GuestInfo.DiscountByAmount,
+                //    DiscountByPercentage = model.GuestInfo.DiscountByPercentage,
+                //    Deposit = model.GuestInfo.Deposit,
+                //    Email = model.GuestInfo.Email,
+                //    GrandTotal = model.GuestInfo.GrandTotal,
+                //    Name = model.GuestInfo.Name,
+                //    IsCanceled = false,
+                //    KnowUsId = model.GuestInfo.KnowUsId,
+                //    WhereYouId = model.GuestInfo.WhereYouId,
+                //    LeftToPay = model.GuestInfo.LeftToPay,
+                //    Identifier = model.GuestInfo.Identifier,
+                //    PaymentCash = model.GuestInfo.PaymentCash,
+                //    Phone = model.GuestInfo.Phone,
+                //    TaxIncluded = model.GuestInfo.TaxIncluded,
+                //    PaymentVisa = model.GuestInfo.PaymentVisa,
+                //    TotalCountOfguest = model.GuestInfo.TotalCountOfguest
+                //};
                 var GuestId = bookingRepository.AddNewGuest(guestModel);
                 List<BookedGuestArea> bookArea = new List<BookedGuestArea>();
                 for (int i = 0; i < model.SelectedArea.Count; i++)
@@ -184,31 +190,33 @@ namespace BackEnd.Controllers
                         model.GuestInfo.KnowUsId = 1;
                     }
                 }
-                Guest guestModel = new Guest
-                {
-                    Id = model.GuestInfo.Id,
-                    BookingTypeId = model.GuestInfo.BookingTypeId,
-                    DateOfBooking = model.GuestInfo.DateOfBooking,
-                    DateOfDeposit = model.GuestInfo.DateOfDeposit,
-                    DebitNote = model.GuestInfo.DebitNote,
-                    DepositWayId = model.GuestInfo.DepositWayId,
-                    DiscountByAmount = model.GuestInfo.DiscountByAmount,
-                    DiscountByPercentage = model.GuestInfo.DiscountByPercentage,
-                    Deposit = model.GuestInfo.Deposit,
-                    Email = model.GuestInfo.Email,
-                    GrandTotal = model.GuestInfo.GrandTotal,
-                    Name = model.GuestInfo.Name,
-                    IsCanceled = false,
-                    KnowUsId = model.GuestInfo.KnowUsId,
-                    WhereYouId = model.GuestInfo.WhereYouId,
-                    LeftToPay = model.GuestInfo.LeftToPay,
-                    Identifier = model.GuestInfo.Identifier,
-                    PaymentCash = model.GuestInfo.PaymentCash,
-                    Phone = model.GuestInfo.Phone,
-                    TaxIncluded = model.GuestInfo.TaxIncluded,
-                    PaymentVisa = model.GuestInfo.PaymentVisa,
-                    TotalCountOfguest = model.GuestInfo.TotalCountOfguest
-                };
+                var guestModel = _mapper.Map<Guest>(model.GuestInfo);
+                guestModel.IsCanceled = false;
+                //Guest guestModel = new Guest
+                //{
+                //    Id = model.GuestInfo.Id,
+                //    BookingTypeId = model.GuestInfo.BookingTypeId,
+                //    DateOfBooking = model.GuestInfo.DateOfBooking,
+                //    DateOfDeposit = model.GuestInfo.DateOfDeposit,
+                //    DebitNote = model.GuestInfo.DebitNote,
+                //    DepositWayId = model.GuestInfo.DepositWayId,
+                //    DiscountByAmount = model.GuestInfo.DiscountByAmount,
+                //    DiscountByPercentage = model.GuestInfo.DiscountByPercentage,
+                //    Deposit = model.GuestInfo.Deposit,
+                //    Email = model.GuestInfo.Email,
+                //    GrandTotal = model.GuestInfo.GrandTotal,
+                //    Name = model.GuestInfo.Name,
+                //    IsCanceled = false,
+                //    KnowUsId = model.GuestInfo.KnowUsId,
+                //    WhereYouId = model.GuestInfo.WhereYouId,
+                //    LeftToPay = model.GuestInfo.LeftToPay,
+                //    Identifier = model.GuestInfo.Identifier,
+                //    PaymentCash = model.GuestInfo.PaymentCash,
+                //    Phone = model.GuestInfo.Phone,
+                //    TaxIncluded = model.GuestInfo.TaxIncluded,
+                //    PaymentVisa = model.GuestInfo.PaymentVisa,
+                //    TotalCountOfguest = model.GuestInfo.TotalCountOfguest
+                //};
                 await  bookingRepository.EditGuest(guestModel);
                 List<GuestActivity> guestActivities = new List<GuestActivity>();
                 for (int i = 0; i < model.SelectedActivities.Count; i++)

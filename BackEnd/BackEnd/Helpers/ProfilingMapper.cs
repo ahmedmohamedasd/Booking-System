@@ -13,6 +13,7 @@ namespace BackEnd.Helpers
         public ProfilingMapper()
         {
             CreateMap<BlockArea, BlockAreaDto>().ReverseMap(); // revers Map that data can map data from source and distination 
+            CreateMap<Guest, GuestInfo>().ReverseMap();
             CreateMap<Guest, GuestDtos>().ReverseMap();
             CreateMap<Activity, ActivityDtos>().ReverseMap();
             CreateMap<Ticket, TicketDtos>().ReverseMap();
