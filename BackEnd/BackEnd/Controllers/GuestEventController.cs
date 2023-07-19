@@ -53,6 +53,12 @@ namespace BackEnd.Controllers
                             PlaceName = model.NewPlaceName,
                             Sorting = sorting
                         };
+                        var placeValidator = new WhereYouFromValidations();
+                        var placeResult = placeValidator.Validate(whereYou);
+                        if (!placeResult.IsValid)
+                        {
+                            return BadRequest(placeResult.Errors);
+                        }
                         await _placeRepository.AddPlace(whereYou);
                         int placeId = _placeRepository.GetIdByName(model.NewPlaceName);
                         model.WhereYouId = placeId;
@@ -73,6 +79,12 @@ namespace BackEnd.Controllers
                             WayName = model.NewSocialName,
                             Sorting = sorting
                         };
+                        var WayValidator = new HowYouKnowUsValidation();
+                        var wayResult = WayValidator.Validate(howYouKnow);
+                        if (!wayResult.IsValid)
+                        {
+                            return BadRequest(wayResult.Errors);
+                        }
                         await _socialRepository.AddWay(howYouKnow);
                         int KnowusId = _socialRepository.GetIdByName(model.NewSocialName);
                         model.KnowUsId = KnowusId;
@@ -141,6 +153,12 @@ namespace BackEnd.Controllers
                             PlaceName = model.NewPlaceName,
                             Sorting = sorting
                         };
+                        var placeValidator = new WhereYouFromValidations();
+                        var placeResult = placeValidator.Validate(whereYou);
+                        if (!placeResult.IsValid)
+                        {
+                            return BadRequest(placeResult.Errors);
+                        }
                         await _placeRepository.AddPlace(whereYou);
                         int placeId = _placeRepository.GetIdByName(model.NewPlaceName);
                         model.WhereYouId = placeId;
@@ -161,6 +179,12 @@ namespace BackEnd.Controllers
                             WayName = model.NewSocialName,
                             Sorting = sorting
                         };
+                        var WayValidator = new HowYouKnowUsValidation();
+                        var wayResult = WayValidator.Validate(howYouKnow);
+                        if (!wayResult.IsValid)
+                        {
+                            return BadRequest(wayResult.Errors);
+                        }
                         await _socialRepository.AddWay(howYouKnow);
                         int KnowusId = _socialRepository.GetIdByName(model.NewSocialName);
                         model.KnowUsId = KnowusId;

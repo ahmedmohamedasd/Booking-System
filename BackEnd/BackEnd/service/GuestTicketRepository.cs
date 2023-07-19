@@ -62,9 +62,21 @@ namespace BackEnd.service
             return model;
         }
 
-        public Task<int> EditGuestTicketsDateBooking(int guestId, DateTime DateOfBooking)
+        public async Task<int> EditGuestTicketsDateBooking(int guestId, DateTime DateOfBooking)
         {
-            throw new NotImplementedException();
+            var model = _context.GuestTickets.Where(c => c.GuestId == guestId).ToList();
+            if (model.Count > 0)
+            {
+                for (int i = 0; i < model.Count; i++)
+                {
+                    model[i].DateOfBooking = DateOfBooking;
+                    _context.GuestTickets.Update(model[i]);
+                    await _context.SaveChangesAsync();
+                }
+                return guestId;
+            }
+
+            return guestId;
         }
 
         public List<GuestTicket> GetListOfGuestTickets(int guestId)

@@ -78,7 +78,13 @@ namespace BackEnd.Controllers
             {
                 return BadRequest();
             }
-            var result = await _whereYouFromRepository.EditPlace(model);
+            var placeValidator = new WhereYouFromValidations();
+            var result = placeValidator.Validate(model);
+            if (!result.IsValid)
+            {
+                return BadRequest(result.Errors);
+            }
+             await _whereYouFromRepository.EditPlace(model);
             return model;
         }
 

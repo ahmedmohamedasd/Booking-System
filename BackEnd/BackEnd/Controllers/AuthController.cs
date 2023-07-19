@@ -60,11 +60,16 @@ namespace BackEnd.Controllers
                         issuer: ConfigurationManager.AppSetting["JWT:Issuer"] ,
                         audience: ConfigurationManager.AppSetting["JWT:Audience"] ,
                         claims: authClaim,
-                        expires: DateTime.Now.AddMinutes(20),
+                        expires: DateTime.Now.AddDays(30),
                         signingCredentials: signingCredentials
                         );
                     var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
-                    return Ok(new { token = tokenString });
+                    loginViewModel model = new loginViewModel
+                    {
+                        Token = tokenString,
+                        UserName = user.UserName
+                    };
+                    return Ok(model);
                 }
                 else
                 {

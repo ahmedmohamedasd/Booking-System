@@ -1,6 +1,7 @@
 ﻿using BackEnd.Data;
 using BackEnd.Iservices;
 using BackEnd.Models;
+using BackEnd.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -50,8 +51,12 @@ namespace BackEnd.Controllers
         {
             try
             {
-                if (model == null)
-                    return BadRequest();
+                var validator = new AreaValidation();
+                var result = validator.Validate(model);
+                if (!result.IsValid)
+                {
+                    return BadRequest(result.Errors);
+                }
                 var createModel = await areaRepository.AddArea(model);
                 return createModel;
             }
@@ -89,6 +94,12 @@ namespace BackEnd.Controllers
                     if (areaInDb == null)
                         return NotFound($"Area Not Found");
 
+                    var validator = new AreaValidation();
+                    var result = validator.Validate(model);
+                    if (!result.IsValid)
+                    {
+                        return BadRequest(result.Errors);
+                    }
                     return await areaRepository.UpdateArea(model);
                 }
                

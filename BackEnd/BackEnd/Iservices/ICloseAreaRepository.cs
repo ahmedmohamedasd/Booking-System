@@ -8,7 +8,7 @@ namespace BackEnd.Iservices
 {
     public interface ICloseAreaRepository
     {
-        Task<BlockArea[]> AddClosedArea(BlockArea[] model);
+        Task<List<BlockArea>> AddClosedArea(List<BlockArea> model);
         List<BlockArea> GetListOfClosedArea(DateTime DateOfBlocked);
         Task<List<BlockArea>> DeleteClosedArea(DateTime DateOfBlocked);
     }

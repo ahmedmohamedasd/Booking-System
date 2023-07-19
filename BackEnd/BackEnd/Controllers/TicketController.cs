@@ -2,6 +2,7 @@
 using BackEnd.Dtos;
 using BackEnd.Iservices;
 using BackEnd.Models;
+using BackEnd.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +60,13 @@ namespace BackEnd.Controllers
             try
             {
                 var ticket = _mapper.Map<Ticket>(model);
+                var ticketValidator = new TicketValidation();
+
+                var result = ticketValidator.Validate(ticket);
+                if (!result.IsValid)
+                {
+                    return BadRequest(result.Errors);
+                }
                 await _ticketRepository.AddTicket(ticket);
                 return model;
             }
@@ -79,7 +87,14 @@ namespace BackEnd.Controllers
                 return BadRequest();
             }
             var ticket = _mapper.Map<Ticket>(model);
-            var result = await _ticketRepository.EditTicket(ticket);
+            var ticketValidator = new TicketValidation();
+
+            var result = ticketValidator.Validate(ticket);
+            if (!result.IsValid)
+            {
+                return BadRequest(result.Errors);
+            }
+            await _ticketRepository.EditTicket(ticket);
             return model;
         }
 

@@ -2,6 +2,7 @@
 using BackEnd.Dtos;
 using BackEnd.Iservices;
 using BackEnd.Models;
+using BackEnd.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -59,6 +60,12 @@ namespace BackEnd.Controllers
             try
             {
                 var activity = _mapper.Map<Activity>(model);
+                var validators = new ActivityValidation();
+                var result = validators.Validate(activity);
+                if (!result.IsValid)
+                {
+                    return BadRequest(result.Errors);
+                }
                 await _activityRepository.AddActivity(activity);
                 return model;
             }
@@ -79,7 +86,13 @@ namespace BackEnd.Controllers
                 return BadRequest();
             }
             var activity = _mapper.Map<Activity>(model);
-            var result = await _activityRepository.EditActivity(activity);
+            var validators = new ActivityValidation();
+            var result = validators.Validate(activity);
+            if (!result.IsValid)
+            {
+                return BadRequest(result.Errors);
+            }
+            await _activityRepository.EditActivity(activity);
             return model;
         }
 

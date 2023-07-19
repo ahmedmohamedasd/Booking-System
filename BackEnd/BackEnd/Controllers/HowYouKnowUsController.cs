@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BackEnd.Iservices;
 using BackEnd.Models;
+using BackEnd.Validations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +55,12 @@ namespace BackEnd.Controllers
         {
             try
             {
+                var WayValidator = new HowYouKnowUsValidation();
+                var wayResult = WayValidator.Validate(model);
+                if (!wayResult.IsValid)
+                {
+                    return BadRequest(wayResult.Errors);
+                }
                 await _howYouKnowUsRepository.AddWay(model);
                 return model;
             }
@@ -73,7 +80,13 @@ namespace BackEnd.Controllers
             {
                 return BadRequest();
             }
-            var result = await _howYouKnowUsRepository.EditWay(model);
+            var WayValidator = new HowYouKnowUsValidation();
+            var wayResult = WayValidator.Validate(model);
+            if (!wayResult.IsValid)
+            {
+                return BadRequest(wayResult.Errors);
+            }
+             await _howYouKnowUsRepository.EditWay(model);
             return model;
         }
 

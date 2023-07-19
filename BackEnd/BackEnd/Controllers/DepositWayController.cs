@@ -1,5 +1,6 @@
 ﻿using BackEnd.Iservices;
 using BackEnd.Models;
+using BackEnd.Validations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -49,6 +50,12 @@ namespace BackEnd.Controllers
         {
             try
             {
+                var validation = new DepositWayValidation();
+                var result = validation.Validate(model);
+                if (!result.IsValid)
+                {
+                    return BadRequest(result.Errors);
+                }
                 await _depositWayes.AddWay(model);
                 return model;
             }
@@ -68,7 +75,13 @@ namespace BackEnd.Controllers
             {
                 return BadRequest();
             }
-            var result = await _depositWayes.EditWay(model);
+            var validation = new DepositWayValidation();
+            var result = validation.Validate(model);
+            if (!result.IsValid)
+            {
+                return BadRequest(result.Errors);
+            }
+             await _depositWayes.EditWay(model);
             return model;
         }
 
@@ -80,7 +93,6 @@ namespace BackEnd.Controllers
             if (Way != null)
             {
                 await _depositWayes.DeleteWay(id);
-
                 return Ok();
             }
             else
@@ -101,7 +113,6 @@ namespace BackEnd.Controllers
             {
                 return NotFound();
             }
-
         }
     }
 }

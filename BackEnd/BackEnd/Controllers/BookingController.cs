@@ -5,6 +5,7 @@ using BackEnd.Iservices;
 using BackEnd.Models;
 using BackEnd.Validations;
 using BackEnd.ViewModel;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -91,6 +92,12 @@ namespace BackEnd.Controllers
                             PlaceName = model.GuestInfo.NewPlaceName,
                             Sorting = sorting
                         };
+                        var validator = new WhereYouFromValidations();
+                        var resultRsident = validator.Validate(whereYou);
+                        if (!resultRsident.IsValid)
+                        {
+                            return BadRequest(resultRsident.Errors);
+                        }
                         await _placeRepository.AddPlace(whereYou);
                         int placeId = _placeRepository.GetIdByName(model.GuestInfo.NewPlaceName);
                         model.GuestInfo.WhereYouId = placeId;
@@ -111,6 +118,12 @@ namespace BackEnd.Controllers
                             WayName = model.GuestInfo.NewSocialName,
                             Sorting = sorting
                         };
+                        var wayValidators = new HowYouKnowUsValidation();
+                        var wayResult = wayValidators.Validate(howYouKnow);
+                        if (!wayResult.IsValid)
+                        {
+                            return BadRequest(wayResult.Errors);
+                        }
                         await _socialRepository.AddWay(howYouKnow);
                         int KnowusId = _socialRepository.GetIdByName(model.GuestInfo.NewSocialName);
                         model.GuestInfo.KnowUsId = KnowusId;
@@ -128,33 +141,10 @@ namespace BackEnd.Controllers
                     return BadRequest(result.Errors);
                 }
 
-                //Guest guestModel = new Guest
-                //{
-                //    BookingTypeId = model.GuestInfo.BookingTypeId,
-                //    DateOfBooking = model.GuestInfo.DateOfBooking,
-                //    DateOfDeposit = model.GuestInfo.DateOfDeposit,
-                //    DebitNote = model.GuestInfo.DebitNote,
-                //    DepositWayId = model.GuestInfo.DepositWayId,
-                //    DiscountByAmount = model.GuestInfo.DiscountByAmount,
-                //    DiscountByPercentage = model.GuestInfo.DiscountByPercentage,
-                //    Deposit = model.GuestInfo.Deposit,
-                //    Email = model.GuestInfo.Email,
-                //    GrandTotal = model.GuestInfo.GrandTotal,
-                //    Name = model.GuestInfo.Name,
-                //    IsCanceled = false,
-                //    KnowUsId = model.GuestInfo.KnowUsId,
-                //    WhereYouId = model.GuestInfo.WhereYouId,
-                //    LeftToPay = model.GuestInfo.LeftToPay,
-                //    Identifier = model.GuestInfo.Identifier,
-                //    PaymentCash = model.GuestInfo.PaymentCash,
-                //    Phone = model.GuestInfo.Phone,
-                //    TaxIncluded = model.GuestInfo.TaxIncluded,
-                //    PaymentVisa = model.GuestInfo.PaymentVisa,
-                //    TotalCountOfguest = model.GuestInfo.TotalCountOfguest
-                //};
-                //  var guestModel = mapper.Map<Guest>(model.GuestInfo);
+                
                 var GuestId = bookingRepository.AddNewGuest(guestModel);
                 List<BookedGuestArea> bookArea = new List<BookedGuestArea>();
+                var bookedValidators = new BookedGuestAreaValidation();
                 for (int i = 0; i < model.SelectedArea.Count; i++)
                 {
                     var ss = new BookedGuestArea
@@ -163,10 +153,18 @@ namespace BackEnd.Controllers
                         DateOfBooking = model.SelectedArea[i].DateOfBooking,
                         GuestId = GuestId
                     };
+                    var bookedResult = bookedValidators.Validate(ss);
+                    if (!bookedResult.IsValid)
+                    {
+                        return BadRequest(bookedResult);
+                    }
                     bookArea.Add(ss);
                 }
+               
+               
                 await bookingRepository.AddBookedGuestArea(bookArea);
                 List<GuestTicket> guestTickets = new List<GuestTicket>();
+                var ticketValidator = new GuestTicketValidation();
                 for (int i = 0; i < model.ListOfTicket.Count; i++)
                 {
                     var ss = new GuestTicket
@@ -179,6 +177,11 @@ namespace BackEnd.Controllers
                         GuestId = GuestId,
                         DateOfBooking = model.GuestInfo.DateOfBooking
                     };
+                    var ticketResult = ticketValidator.Validate(ss);
+                    if (!ticketResult.IsValid)
+                    {
+                        return BadRequest(ticketResult.Errors);
+                    }
                     guestTickets.Add(ss);
                 }
                 await _guestTicketRepo.AddGuestTicket(guestTickets);
@@ -201,9 +204,22 @@ namespace BackEnd.Controllers
                 {
                     if (model.GuestInfo.NewPlaceName != "")
                     {
-                                               
-                        int KnowusId = bookingRepository.AddNewPlace(model.GuestInfo.NewPlaceName);
-                        model.GuestInfo.WhereYouId = KnowusId;
+                        var sorting = _placeRepository.GetSorting();
+                        WhereYouFrom whereYou = new WhereYouFrom
+                        {
+                            IsDeleted = false,
+                            PlaceName = model.GuestInfo.NewPlaceName,
+                            Sorting = sorting
+                        };
+                        var validator = new WhereYouFromValidations();
+                        var resultRsident = validator.Validate(whereYou);
+                        if (!resultRsident.IsValid)
+                        {
+                            return BadRequest(resultRsident.Errors);
+                        }
+                        await _placeRepository.AddPlace(whereYou);
+                        int placeId = _placeRepository.GetIdByName(model.GuestInfo.NewPlaceName);
+                        model.GuestInfo.WhereYouId = placeId;
                     }
                     else
                     {
@@ -214,7 +230,21 @@ namespace BackEnd.Controllers
                 {
                     if (model.GuestInfo.NewSocialName != "")
                     {
-                        int KnowusId = bookingRepository.AddNewSocialWay(model.GuestInfo.NewSocialName);
+                        var sorting = _socialRepository.GetSorting();
+                        HowYouKnowUs howYouKnow = new HowYouKnowUs
+                        {
+                            IsDeleted = false,
+                            WayName = model.GuestInfo.NewSocialName,
+                            Sorting = sorting
+                        };
+                        var wayValidators = new HowYouKnowUsValidation();
+                        var wayResult = wayValidators.Validate(howYouKnow);
+                        if (!wayResult.IsValid)
+                        {
+                            return BadRequest(wayResult.Errors);
+                        }
+                        await _socialRepository.AddWay(howYouKnow);
+                        int KnowusId = _socialRepository.GetIdByName(model.GuestInfo.NewSocialName);
                         model.GuestInfo.KnowUsId = KnowusId;
                     }
                     else
@@ -234,6 +264,7 @@ namespace BackEnd.Controllers
               
                 //  await bookingRepository.DeleteGuestTicket(model.GuestInfo.Id);
                 List<GuestTicket> guestTickets = new List<GuestTicket>();
+                var ticketValidator = new GuestTicketValidation();
                 for (int i = 0; i < model.ListOfTicket.Count; i++)
                 {
                     var ss = new GuestTicket
@@ -243,8 +274,15 @@ namespace BackEnd.Controllers
                         CountOfKids = model.ListOfTicket[i].QuantityForKids,
                         PriceForAdult = model.ListOfTicket[i].PriceForAdult,
                         PriceForKids = model.ListOfTicket[i].PriceForKids,
-                        GuestId = model.GuestInfo.Id
+                        GuestId = model.GuestInfo.Id,
+                        DateOfBooking = model.GuestInfo.DateOfBooking
+                        
                     };
+                    var ticketResult = ticketValidator.Validate(ss);
+                    if (!ticketResult.IsValid)
+                    {
+                        return BadRequest(ticketResult.Errors);
+                    }
                     guestTickets.Add(ss);
                 }
                 var guestTicketsInDb = _guestTicketRepo.GetListOfGuestTickets(guestModel.Id);
@@ -307,7 +345,7 @@ namespace BackEnd.Controllers
 
             if (model.NewBooking[0].DateOfBooking.Date == model.OldBooking[0].DateOfBooking.Date)
             {
-
+                var bookedAreaValidation = new BookedGuestAreaValidation();
                 for (int i = 0; i < model.NewBooking.Count; i++)
                 {
                     var ss = new BookedGuestArea
@@ -316,6 +354,11 @@ namespace BackEnd.Controllers
                         DateOfBooking = model.NewBooking[i].DateOfBooking,
                         GuestId = guestId
                     };
+                    var bookedResult = bookedAreaValidation.Validate(ss);
+                    if (!bookedResult.IsValid)
+                    {
+                        return (IEnumerable<BookedGuestArea>)BadRequest(bookedResult.Errors);
+                    }
                     NewModel.Add(ss);
                 }
 
@@ -378,24 +421,42 @@ namespace BackEnd.Controllers
         [HttpPut("undoCancelGuestBooking/{guestId}")]
         public async Task<ActionResult<int>> UndoCancelGuestBooking(int guestId , List<SelectedArea> model)
         {
-            List<BookedGuestArea> bookedGuests = new List<BookedGuestArea>();
-            for(int i = 0; i < model.Count; i++)
+            try
             {
-                var ss = new BookedGuestArea
+                List<BookedGuestArea> bookedGuests = new List<BookedGuestArea>();
+                var validator = new BookedGuestAreaValidation();
+                for (int i = 0; i < model.Count; i++)
                 {
-                    AreaId = model[i].AreaId,
-                    DateOfBooking = model[i].DateOfBooking,
-                    GuestId = guestId
-                };
-                bookedGuests.Add(ss);
+                    var ss = new BookedGuestArea
+                    {
+                        AreaId = model[i].AreaId,
+                        DateOfBooking = model[i].DateOfBooking,
+                        GuestId = guestId
+                    };
+                    var _result = validator.Validate(ss);
+                    if (!_result.IsValid)
+                    {
+                        return BadRequest(_result.Errors);
+                    }
+                    bookedGuests.Add(ss);
+                }
+                await _guestArea.AddGuestArea(bookedGuests);
+                var result = await _guestRepository.UndoCancelGuest(guestId, model[0].DateOfBooking);
+                if (result == true)
+                {
+                    return guestId;
+                }
+                else
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, "Guest Not Found");
+                }
             }
-            await _guestArea.AddGuestArea(bookedGuests);
-            var result = await _guestRepository.UndoCancelGuest(guestId , model[0].DateOfBooking);
-            if (result == true)
+            catch (Exception)
             {
-                return guestId;
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error in Added Guest");
+
             }
-            return StatusCode(StatusCodes.Status404NotFound, "Guest Not Found");
+            
         }
 
         [HttpDelete("DeleteGuestBooking/{guestId}")]

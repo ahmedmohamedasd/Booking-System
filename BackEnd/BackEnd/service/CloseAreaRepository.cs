@@ -16,9 +16,9 @@ namespace BackEnd.service
         {
             this._context = _context;
         }
-        public async Task<BlockArea[]> AddClosedArea(BlockArea[] model)
+        public async Task<List<BlockArea>> AddClosedArea(List<BlockArea> model)
         {
-            for(int i = 0; i < model.Length; i++)
+            for(int i = 0; i < model.Count; i++)
             {
               await  _context.BlockAreas.AddAsync(model[i]);
               await  _context.SaveChangesAsync();

@@ -1,6 +1,7 @@
 ﻿using BackEnd.Dtos;
 using BackEnd.Iservices;
 using BackEnd.Models;
+using BackEnd.Validations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -43,6 +44,12 @@ namespace BackEnd.Controllers
         {
             try
             {
+                var validation = new EventValidation();
+                var result = validation.Validate(model);
+                if (!result.IsValid)
+                {
+                    return BadRequest(result.Errors);
+                }
                 await _eventRepository.AddEvent(model);
                 return Ok();
             }
@@ -67,6 +74,12 @@ namespace BackEnd.Controllers
             }
             try
             {
+                var validation = new EventValidation();
+                var result = validation.Validate(model);
+                if (!result.IsValid)
+                {
+                    return BadRequest(result.Errors);
+                }
                 await _eventRepository.EditEvent(model);
                 return Ok();
             }

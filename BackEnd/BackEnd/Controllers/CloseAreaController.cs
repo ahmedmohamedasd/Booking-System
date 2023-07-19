@@ -2,6 +2,9 @@
 using BackEnd.Dtos;
 using BackEnd.Iservices;
 using BackEnd.Models;
+using BackEnd.Validations;
+using BackEnd.ViewModel;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -41,14 +44,22 @@ namespace BackEnd.Controllers
         }
        
         [HttpPost]
-        public async Task<ActionResult<BlockArea[]>> Post([FromBody] BlockAreaDto[] model)
+        public async Task<ActionResult<List<BlockArea>>> Post(List<BlockAreaDto> model)
         {
             try
             {
                 if (model == null)
                     return BadRequest();
 
-                var blockArea = mapper.Map<BlockArea[]>(model);
+                var blockArea = mapper.Map<List<BlockArea>>(model);
+                ListofBlockAreas ss = new ListofBlockAreas();
+                ss.BlockAreas = blockArea;
+                var validation = new listOFBlockAreaValidation();
+                var resultblockArea = validation.Validate(ss);
+                if (!resultblockArea.IsValid)
+                {
+                    return BadRequest(resultblockArea.Errors);
+                }
                 var result = await _closeAreaRepository.AddClosedArea(blockArea);
 
                 return result;

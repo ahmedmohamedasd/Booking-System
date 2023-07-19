@@ -34,7 +34,6 @@ namespace BackEnd.service
             context.Guests.Add(guest);
             context.SaveChanges();
             var GuestId = context.Guests.Where(c => c.Name == guest.Name && c.DateOfBooking == guest.DateOfBooking && c.Phone == guest.Phone).FirstOrDefault().Id;
-            
             return  GuestId;
         }
 
